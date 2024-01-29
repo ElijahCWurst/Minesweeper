@@ -15,26 +15,26 @@ namespace Minesweeper
 			{
 				for(int j = 0; j < 30; ++j)
 				{
-                    Button butt = new Button();
-                    butt.Style = (Style)FindResource("HoverButtonStyle");
+                    Button btn = new Button();
+                    btn.Style = (Style)FindResource("HoverButtonStyle");
 
 
-                    butt.BorderThickness = new Thickness(0);
+                    btn.BorderThickness = new Thickness(0);
 
 
-                    butt.Click += new RoutedEventHandler(Button_Click);
-                    myGrid.Children.Add(butt);
+                    btn.Click += new RoutedEventHandler(Button_Click);
+                    myGrid.Children.Add(btn);
                     if ((i + j) % 2 == 0)
                     {
-                        butt.Background = Brushes.LawnGreen;
+                        btn.Background = Brushes.LawnGreen;
                     }
                     else
                     {
-                        butt.Background = Brushes.LimeGreen;
+                        btn.Background = Brushes.LimeGreen;
                     }
 
-                    Grid.SetRow(butt, i);
-                    Grid.SetColumn(butt, j);
+                    Grid.SetRow(btn, i);
+                    Grid.SetColumn(btn, j);
                 }
 
 			}
@@ -42,7 +42,7 @@ namespace Minesweeper
 		}
         protected void Button_Click(object sender, RoutedEventArgs e)
         {
-            Button butt = (Button)sender;
+            Button btn = (Button)sender;
         }
 
     }
