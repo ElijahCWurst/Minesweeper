@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Linq;
 
 namespace Minesweeper
 {
@@ -9,14 +10,21 @@ namespace Minesweeper
 		private const int ROWS = 16;
 		private const int COLS = 30;
 		private const int BOMBS = 99;
+		private readonly Brush OpenColor = new SolidColorBrush(Colors.White);
 		private bool gameStarted = false;
 		private int[,] grid = new int[ROWS, COLS];
 		private (int row, int col)[] bombList = new (int, int)[BOMBS];
 		public MainWindow()
 		{
 			InitializeComponent();
-			
-
+			for (int i = 0; i < ROWS; ++i)
+			{
+                myGrid.RowDefinitions.Add(new RowDefinition());
+            }
+			for (int j = 0 ; j < COLS; ++j)
+			{
+                myGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            }
 
 
 			for (int i = 0; i < ROWS; ++i)
@@ -24,7 +32,7 @@ namespace Minesweeper
 				for(int j = 0; j < COLS; ++j)
 				{
 					Button btn = new Button();
-					btn.Style = (Style)FindResource("HoverButtonStyle");
+					//btn.Style = (Style)FindResource("HoverButtonStyle");
 
 
 					btn.BorderThickness = new Thickness(0);
@@ -41,7 +49,7 @@ namespace Minesweeper
 						btn.Background = Brushes.LimeGreen;
 					}
 
-					Grid.SetRow(btn, i);
+                    Grid.SetRow(btn, i);
 					Grid.SetColumn(btn, j);
 				}
 
@@ -69,12 +77,7 @@ namespace Minesweeper
             }
             else
 			{
-                btn.Background = Brushes.White;
-                int num = countBombsWrapper(clickPoint, bombList);
-				if(num != 0)
-				{
-					btn.Content = num;
-                }
+                openSelf(clickPoint, bombList, sender);
 
             }
 			//btn.Content = Grid.GetRow(btn) + "," + Grid.GetColumn(btn);
@@ -107,9 +110,9 @@ namespace Minesweeper
 
 		}
 
-		private int countBombsWrapper((int row, int col) clickPoint, (int row, int col)[] bombList)
+		private int countBombsWrapper((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
 		{
-			return
+			int temp = 
 			countBombs((clickPoint.row - 1, clickPoint.col - 1), bombList) +
 			countBombs((clickPoint.row - 1, clickPoint.col + 1), bombList) +
 			countBombs((clickPoint.row + 1, clickPoint.col - 1), bombList) +
@@ -118,6 +121,11 @@ namespace Minesweeper
             countBombs((clickPoint.row, clickPoint.col + 1), bombList) +
             countBombs((clickPoint.row - 1, clickPoint.col), bombList) +
             countBombs((clickPoint.row + 1, clickPoint.col), bombList);
+			if (temp == 0)
+			{
+				openSurrounding(clickPoint, bombList, sender);
+			}
+			return temp;
 		}
 
         private int countBombs((int row, int col) clickPoint, (int row, int col)[] bombList)
@@ -132,6 +140,30 @@ namespace Minesweeper
 			}
         }
 
+		private void openSurrounding((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
+		{
+			openSelf((clickPoint.row - 1, clickPoint.col - 1), bombList, sender);
+			openSelf((clickPoint.row - 1, clickPoint.col + 1), bombList, sender);
+			openSelf((clickPoint.row + 1, clickPoint.col - 1), bombList, sender);
+			openSelf((clickPoint.row + 1, clickPoint.col + 1), bombList, sender);
+			openSelf((clickPoint.row, clickPoint.col - 1), bombList, sender);
+			openSelf((clickPoint.row, clickPoint.col + 1), bombList, sender);
+			openSelf((clickPoint.row - 1, clickPoint.col), bombList, sender);
+			openSelf((clickPoint.row + 1, clickPoint.col), bombList, sender);
+        }
+
+		private void openSelf((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
+		{
+			if (clickPoint.row < 0 || clickPoint.row >= ROWS || clickPoint.col < 0 || clickPoint.col >= COLS) return;
+            Button btn = myGrid.Children.Cast<Button>().First(e => Grid.GetRow(e) == clickPoint.row && Grid.GetColumn(e) == clickPoint.col);
+			if (btn.Background == OpenColor)
+			{
+				return;
+			}
+            btn.Background = OpenColor;
+            int bombCount = countBombsWrapper(clickPoint, bombList, sender);
+            btn.Content = bombCount > 0 ? bombCount : "";
+        }
     }
 
 }
