@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Linq;
 
 namespace Minesweeper
 {
@@ -10,7 +9,19 @@ namespace Minesweeper
 		private const int ROWS = 16;
 		private const int COLS = 30;
 		private const int BOMBS = 99;
-		private readonly Brush OpenColor = new SolidColorBrush(Colors.White);
+		private readonly Brush OpenColor = new SolidColorBrush(Colors.Wheat);
+		private readonly Dictionary<int, Brush> ColorMap = new Dictionary<int, Brush>
+		{
+			{ 0, Brushes.White },
+			{ 1, Brushes.Blue },
+            { 2, Brushes.Green },
+			{ 3, Brushes.Red },
+			{ 4, Brushes.Purple },
+			{ 5, Brushes.Maroon },
+			{ 6, Brushes.Turquoise },
+			{ 7, Brushes.Black },
+			{ 8, Brushes.Gray }
+        };
 		private bool gameStarted = false;
 		private int[,] grid = new int[ROWS, COLS];
 		private (int row, int col)[] bombList = new (int, int)[BOMBS];
@@ -36,9 +47,9 @@ namespace Minesweeper
 
 
 					btn.BorderThickness = new Thickness(0);
-
-
+					btn.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(Button_Click);
 					btn.Click += new RoutedEventHandler(Button_Click);
+					
 					myGrid.Children.Add(btn);
 					if ((i + j) % 2 == 0)
 					{
@@ -61,6 +72,7 @@ namespace Minesweeper
 
 			Button btn = (Button)sender;
 			(int row, int col) clickPoint = (Grid.GetRow(btn), Grid.GetColumn(btn));
+
 			if (!gameStarted)
 			{
 				btn.Background = Brushes.HotPink;
@@ -74,8 +86,7 @@ namespace Minesweeper
                 MessageBox.Show("You Lose!");
                 //gameStarted = false;
                 return;
-            }
-            else
+            } else
 			{
                 openSelf(clickPoint, bombList, sender);
 
@@ -109,7 +120,6 @@ namespace Minesweeper
 			return bombList;
 
 		}
-
 		private int countBombsWrapper((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
 		{
 			int temp = 
@@ -127,7 +137,6 @@ namespace Minesweeper
 			}
 			return temp;
 		}
-
         private int countBombs((int row, int col) clickPoint, (int row, int col)[] bombList)
         {
 			if (bombList.Contains(clickPoint))
@@ -139,7 +148,6 @@ namespace Minesweeper
 				return 0;
 			}
         }
-
 		private void openSurrounding((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
 		{
 			openSelf((clickPoint.row - 1, clickPoint.col - 1), bombList, sender);
@@ -151,18 +159,24 @@ namespace Minesweeper
 			openSelf((clickPoint.row - 1, clickPoint.col), bombList, sender);
 			openSelf((clickPoint.row + 1, clickPoint.col), bombList, sender);
         }
-
-		private void openSelf((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
-		{
-			if (clickPoint.row < 0 || clickPoint.row >= ROWS || clickPoint.col < 0 || clickPoint.col >= COLS) return;
+        private void openSelf((int row, int col) clickPoint, (int row, int col)[] bombList, object sender)
+        {
+            if (clickPoint.row < 0 || clickPoint.row >= ROWS || clickPoint.col < 0 || clickPoint.col >= COLS) return;
             Button btn = myGrid.Children.Cast<Button>().First(e => Grid.GetRow(e) == clickPoint.row && Grid.GetColumn(e) == clickPoint.col);
-			if (btn.Background == OpenColor)
-			{
-				return;
-			}
+            if (btn.Background == OpenColor)
+            {
+                return;
+            }
             btn.Background = OpenColor;
             int bombCount = countBombsWrapper(clickPoint, bombList, sender);
-            btn.Content = bombCount > 0 ? bombCount : "";
+            btn.Content = new TextBlock()
+            {
+                Text = bombCount > 0 ? bombCount.ToString() : "",
+                FontWeight = FontWeights.UltraBold,
+				FontSize = 16,
+                Foreground = ColorMap[bombCount],
+				FontFamily = new FontFamily("Lucida Console")
+			};
         }
     }
 
