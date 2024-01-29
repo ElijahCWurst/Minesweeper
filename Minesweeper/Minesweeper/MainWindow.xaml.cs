@@ -63,16 +63,21 @@ namespace Minesweeper
 			{
                 btn.Background = Brushes.Red;
                 btn.Content = "X";
-                //MessageBox.Show("You Lose!");
+                MessageBox.Show("You Lose!");
                 //gameStarted = false;
                 return;
             }
             else
 			{
                 btn.Background = Brushes.White;
-                btn.Content = "0";
+                int num = countBombsWrapper(clickPoint, bombList);
+				if(num != 0)
+				{
+					btn.Content = num;
+                }
+
             }
-			btn.Content = Grid.GetRow(btn) + "," + Grid.GetColumn(btn);
+			//btn.Content = Grid.GetRow(btn) + "," + Grid.GetColumn(btn);
 		}
 
 		private (int row, int col)[] generateMines(int[,] grid, (int row, int col) clickPoint)
@@ -102,6 +107,31 @@ namespace Minesweeper
 
 		}
 
-	}
+		private int countBombsWrapper((int row, int col) clickPoint, (int row, int col)[] bombList)
+		{
+			return
+			countBombs((clickPoint.row - 1, clickPoint.col - 1), bombList) +
+			countBombs((clickPoint.row - 1, clickPoint.col + 1), bombList) +
+			countBombs((clickPoint.row + 1, clickPoint.col - 1), bombList) +
+			countBombs((clickPoint.row + 1, clickPoint.col + 1), bombList) +
+            countBombs((clickPoint.row, clickPoint.col - 1), bombList) +
+            countBombs((clickPoint.row, clickPoint.col + 1), bombList) +
+            countBombs((clickPoint.row - 1, clickPoint.col), bombList) +
+            countBombs((clickPoint.row + 1, clickPoint.col), bombList);
+		}
+
+        private int countBombs((int row, int col) clickPoint, (int row, int col)[] bombList)
+        {
+			if (bombList.Contains(clickPoint))
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+        }
+
+    }
 
 }
